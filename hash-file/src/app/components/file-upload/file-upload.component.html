@@ -1,0 +1,31 @@
+<ngx-file-drop dropZoneLabel="Drop files here" (onFileDrop)="dropped($event)" (onFileOver)="fileOver($event)" (onFileLeave)="fileLeave($event)" dropZoneClassName="drop-zone">
+    <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
+        <div style="color: #6d6d6d; font-size: 15px;" fxLayout="column" fxLayoutGap="25px" fxLayoutAlign="center center">
+            <mat-icon style="font-size: 40px;">get_app</mat-icon>
+            <div fxLayout="row" fxLayoutGap="5px">
+                <span>Drop Files Here or </span>
+                <a title="Click to browse files." aria-label="Click to browse files." tabindex="0" type="button" (click)="openFileSelector()" (keydown.enter)="openFileSelector()">Browse Files</a>
+            </div>
+        </div>
+    </ng-template>
+</ngx-file-drop>
+<div class="center" fxLayoutAlign="center center">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Size</th>
+                <th>Last modified</th>
+                <th>HASH</th>
+            </tr>
+        </thead>
+        <tbody class="upload-name-style">
+            <tr *ngFor="let item of filesInformation; let i=index">
+                <td>{{ item.name }}</td>
+                <td>{{ item.size }} Ko</td>
+                <td>{{ item.lastModified }} </td>
+                <td>{{ item.hash }} </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
