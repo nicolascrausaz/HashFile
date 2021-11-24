@@ -11,14 +11,17 @@ export class FileHashService {
   /**
    * This function hash a file with sha256
    * @param file 
-   * @returns 
    */
   hash(file: File, filePerso: FileHash) {
-    let hash = "TEMP";
+
+    // Start counter
+    var startTime = performance.now()
+
+    let hash = "Calculating...";
     let hasher = new Crypto.SHA256();
     if (file) {
       let size = file.size;
-      let chunk_size = Math.pow(2, 27);
+      let chunk_size = Math.pow(2, 27);  //Best size found
       let offset = 0;
 
       let reader = new FileReader();
@@ -27,7 +30,7 @@ export class FileHashService {
         if (reader.readyState == FileReader.DONE) {
           // Hash with sha256 from asmCrypto
           let uint8_data = new Uint8Array(<ArrayBuffer>e.target.result);
-          hasher.process(uint8_data);
+          hasher.process(uint8_data);  //Hash the partial file
 
           if (offset < size) {
             // Update offset for next slice
@@ -37,7 +40,11 @@ export class FileHashService {
             // If we are done, finalize the hash with all hash
             hasher.finish();
             hash = this.bytes_to_hex(hasher.result)
-            console.log("Hash", hash);
+            
+            // Stop counter
+            var endTime = performance.now()
+            console.log(`Hash the file took ${endTime - startTime} milliseconds`)
+
             filePerso.hash = hash;
             return;
           }
@@ -49,7 +56,7 @@ export class FileHashService {
   }
 
 
-
+  // Private methode to convert ann Uint8Array of byte to a string of hexadecimal values
   private bytes_to_hex(arr: Uint8Array) {
     var str = '';
     for (var i = 0; i < arr.length; i++) {
