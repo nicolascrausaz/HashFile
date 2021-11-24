@@ -36,9 +36,9 @@ export class FileUploadComponent implements OnInit {
             name: file.name,
             lastModified: new Date(file.lastModified),
             size: file.size / 1000,
-            hash: "calculating..." // convert bytes to hex string
+            hash: "calculating..."
           }
-          this.fileHashService.hash(file, filePerso);
+          this.fileHashService.hash(file, filePerso); //Hash the file
 
           this.filesInformation.push(filePerso);
         });

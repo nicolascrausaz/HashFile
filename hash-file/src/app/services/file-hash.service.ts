@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import Crypto from "../../../node_modules/asmcrypto-lite/asmcrypto.js";
 import { FileHash } from '../model/file-hash.model.js';
 @Injectable({
   providedIn: 'root'
@@ -13,24 +12,28 @@ export class FileHashService {
    * @param file 
    */
   hash(file: File, filePerso: FileHash) {
-
     // Start counter
     var startTime = performance.now()
 
-    let hash = "Calculating...";
-    let hasher = new Crypto.SHA256();
     if (file) {
       let size = file.size;
       let chunk_size = Math.pow(2, 27);  //Best size found
       let offset = 0;
 
+      let allHash = [];
+
       let reader = new FileReader();
 
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         if (reader.readyState == FileReader.DONE) {
           // Hash with sha256 from asmCrypto
           let uint8_data = new Uint8Array(<ArrayBuffer>e.target.result);
-          hasher.process(uint8_data);  //Hash the partial file
+
+          const hashCrypto = await crypto.subtle.digest('SHA-256', uint8_data);
+          const hashArray = Array.from(new Uint8Array(hashCrypto));  // convert buffer in octet array
+          console.log(hashArray);
+          const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert byte to hex
+          allHash.push(hashHex);
 
           if (offset < size) {
             // Update offset for next slice
@@ -38,14 +41,22 @@ export class FileHashService {
             reader.readAsArrayBuffer(file.slice(offset, offset + chunk_size));
           } else {
             // If we are done, finalize the hash with all hash
-            hasher.finish();
-            hash = this.bytes_to_hex(hasher.result)
-            
+            allHash.pop();  //Remove the last one because non part of the file
+
+            // If we have only one hash no need to hash it again
+            if (allHash.length === 1) {
+              filePerso.hash = allHash.pop();
+            } else {
+              const hashCrypto = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(allHash.join())); // Hash all the hash
+              const hashArray = Array.from(new Uint8Array(hashCrypto));  // convert buffer in octet array
+              const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');  // convert byte to hex
+              filePerso.hash = hashHex;
+            }
+
             // Stop counter
             var endTime = performance.now()
             console.log(`Hash the file took ${endTime - startTime} milliseconds`)
 
-            filePerso.hash = hash;
             return;
           }
         }
@@ -53,17 +64,5 @@ export class FileHashService {
       // First call we get 0, chunck_size
       reader.readAsArrayBuffer(file.slice(offset, offset + chunk_size));
     }
-  }
-
-
-  // Private methode to convert ann Uint8Array of byte to a string of hexadecimal values
-  private bytes_to_hex(arr: Uint8Array) {
-    var str = '';
-    for (var i = 0; i < arr.length; i++) {
-      var h = (arr[i] & 0xff).toString(16);
-      if (h.length < 2) str += '0';
-      str += h;
-    }
-    return str;
   }
 }
