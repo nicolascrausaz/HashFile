@@ -8,8 +8,8 @@ export class FileHashService {
 
   constructor() { }
 
-  readonly FILESIZE: number = 100000000; // 1GB
-  readonly CHUNKSIZE: number = Math.pow(2, 27);
+  readonly FILESIZE: number = 1000000000  ; // 1GB
+  readonly CHUNKSIZE: number = Math.pow(2, 28); //Best result found
 
   /**
    * This function hash a file with sha256
@@ -61,7 +61,7 @@ export class FileHashService {
 
     let hasher = new Crypto.SHA256();
     let size = file.size;
-    let chunk_size = this.CHUNKSIZE
+    let chunk_size = this.CHUNKSIZE;
     let offset = 0;
 
     let reader = new FileReader();
@@ -76,6 +76,7 @@ export class FileHashService {
           // Update offset for next slice
           offset += chunk_size;
           reader.readAsArrayBuffer(file.slice(offset, offset + chunk_size));
+          filePerso.hash = Math.round((offset / size * 100)) + "/100%";
         } else {
           // If we are done, finalize the hash with all hash
           hasher.finish();
