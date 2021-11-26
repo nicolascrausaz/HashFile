@@ -21,7 +21,7 @@ export class FileHashService {
       let hasher = CryptoJS.algo.SHA256.create();
 
       let size = file.size;
-      let chunk_size = Math.pow(2, 25);  //Best size found
+      let chunk_size = Math.pow(2, 27);  //Best size found
       let offset = 0;
 
 
