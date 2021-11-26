@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FileHash } from '../model/file-hash.model.js';
+import * as CryptoJS from 'crypto-js';
 @Injectable({
   providedIn: 'root'
 })
@@ -16,42 +17,30 @@ export class FileHashService {
     var startTime = performance.now()
 
     if (file) {
+
+      let hasher = CryptoJS.algo.SHA256.create();
+
       let size = file.size;
-      let chunk_size = Math.pow(2, 27);  //Best size found
+      let chunk_size = Math.pow(2, 25);  //Best size found
       let offset = 0;
 
-      let allHash = [];
 
       let reader = new FileReader();
 
       reader.onload = async (e) => {
         if (reader.readyState == FileReader.DONE) {
-          // Hash with sha256 from asmCrypto
-          let uint8_data = new Uint8Array(<ArrayBuffer>e.target.result);
-
-          const hashCrypto = await crypto.subtle.digest('SHA-256', uint8_data);
-          const hashArray = Array.from(new Uint8Array(hashCrypto));  // convert buffer in octet array
-          console.log(hashArray);
-          const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert byte to hex
-          allHash.push(hashHex);
+          // Hash with sha256 from CryptoJS
+          hasher.update(this.arrayBufferToWordArray(<ArrayBuffer>e.target.result));
 
           if (offset < size) {
             // Update offset for next slice
             offset += chunk_size;
             reader.readAsArrayBuffer(file.slice(offset, offset + chunk_size));
+            filePerso.hash = Math.round((offset / size * 100)) + "/100%";
           } else {
             // If we are done, finalize the hash with all hash
-            allHash.pop();  //Remove the last one because non part of the file
-
-            // If we have only one hash no need to hash it again
-            if (allHash.length === 1) {
-              filePerso.hash = allHash.pop();
-            } else {
-              const hashCrypto = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(allHash.join())); // Hash all the hash
-              const hashArray = Array.from(new Uint8Array(hashCrypto));  // convert buffer in octet array
-              const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');  // convert byte to hex
-              filePerso.hash = hashHex;
-            }
+            let hash = hasher.finalize().toString();
+            filePerso.hash = hash;
 
             // Stop counter
             var endTime = performance.now()
@@ -64,5 +53,17 @@ export class FileHashService {
       // First call we get 0, chunck_size
       reader.readAsArrayBuffer(file.slice(offset, offset + chunk_size));
     }
+  }
+
+  private arrayBufferToWordArray(ab: ArrayBuffer) {
+    var i8a = new Uint8Array(ab);
+    // Extract bytes
+    var words = [];
+    for (var i = 0; i < i8a.length; i++) {
+      words[i >>> 2] |= i8a[i] << (24 - (i % 4) * 8);
+    }
+
+    // Initialize this word array
+    return CryptoJS.lib.WordArray.create(words, i8a.length);
   }
 }
