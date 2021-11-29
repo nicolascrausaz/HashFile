@@ -21,7 +21,9 @@ export class FileHashService {
     if (file) file.size < this.FILESIZE ? this.hashSmallFile(file, filePerso) : this.hashBigFile(file, filePerso);
   }
 
-
+/**
+ * This function hashes file using CryptoWeb
+ */
   hashSmallFile(file: File, filePerso: FileHash) {
     // Start counter
     var startTime = performance.now()
@@ -55,6 +57,9 @@ export class FileHashService {
 
   }
 
+  /**
+   * This function hashes file using ASMCrypto.js
+   */
   hashBigFile(file: File, filePerso: FileHash) {
     // Start counter
     var startTime = performance.now()
