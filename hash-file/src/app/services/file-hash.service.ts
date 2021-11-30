@@ -9,7 +9,7 @@ export class FileHashService {
   constructor() { }
 
   readonly FILESIZE: number = 1000000000  ; // 1GB
-  readonly CHUNKSIZE: number = Math.pow(2, 27); //Best result found
+  readonly CHUNKSIZE: number = Math.pow(2, 28); //Best result found
 
   /**
    * This function hash a file with sha256
