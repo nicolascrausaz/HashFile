@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import crypto from "../../../../node_modules/asmcrypto-lite/asmcrypto.js";
 import { NgxFileDropEntry, FileSystemFileEntry, FileSystemDirectoryEntry } from 'ngx-file-drop';
 import { FileHash } from 'src/app/model/file-hash.model';
 import { FileHashService } from 'src/app/services/file-hash.service';

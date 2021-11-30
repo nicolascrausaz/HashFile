@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import Crypto from "../../../node_modules/asmcrypto-lite/asmcrypto.js";
+import * as asmCrypto from "../../../node_modules/asmcrypto.js/asmcrypto.all.js";
 import { FileHash } from '../model/file-hash.model.js';
 @Injectable({
   providedIn: 'root'
@@ -9,7 +9,7 @@ export class FileHashService {
   constructor() { }
 
   readonly FILESIZE: number = 1000000000  ; // 1GB
-  readonly CHUNKSIZE: number = Math.pow(2, 28); //Best result found
+  readonly CHUNKSIZE: number = Math.pow(2, 27); //Best result found
 
   /**
    * This function hash a file with sha256
@@ -64,7 +64,7 @@ export class FileHashService {
     // Start counter
     var startTime = performance.now()
 
-    let hasher = new Crypto.SHA256();
+    let hasher = new asmCrypto.SHA256();
     let size = file.size;
     let chunk_size = this.CHUNKSIZE;
     let offset = 0;
